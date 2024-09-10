@@ -2,6 +2,7 @@
 
 
 import React from "react";
+import { Link } from "react-router-dom";
 
 const LoginPage = () => {
   return (
@@ -37,9 +38,9 @@ const LoginPage = () => {
           </label>
         </div>
 
-        <button className="mt-6 bg-[#020252] hover:opacity-[70%] text-white py-2 px-4 rounded w-[300px] /md:w-[621px] font-[400] text-[20px] md:text-[28px] leading-[38.73px]">
+        <Link to={'/signin'} className="mt-6 bg-[#020252] hover:opacity-[70%] text-white py-2 px-4 rounded w-[300px] /md:w-[621px] font-[400] text-[20px] md:text-[28px] leading-[38.73px]">
           Proceed
-        </button>
+        </Link>
       </div>
       </div>
     </div>
