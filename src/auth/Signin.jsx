@@ -6,12 +6,68 @@ import facebook from './../assets/facebook.svg';
 import message from "../assets/message.svg";
 import passwordd from "../assets/password.svg";
 
-const Signin = () => {
+import { getAuth, signInWithPopup, GoogleAuthProvider } from "firebase/auth";
+import { getDatabase, ref, set, get } from "firebase/database";
+import { useNavigate, useParams } from "react-router-dom";
+
+const Signin = ({ app }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [emailError, setEmailError] = useState("");
   const [passwordError, setPasswordError] = useState("");
   const [loading, setLoading] = useState(false);
+
+  const { role } = useParams()
+
+  const navigate = useNavigate()
+  const provider = new GoogleAuthProvider();
+  const auth = getAuth();
+  const database = getDatabase(app);
+
+  const signinWithGoogle = () => {
+    signInWithPopup(auth, provider)
+      .then((result) => {
+        const user = result.user;
+        console.log(user);
+        saveUserDetails(user)
+
+      })
+      .catch((error) => {
+        console.log('Error occured while sign in');
+
+      });
+  }
+
+  const saveUserDetails = (user) => {
+    const userRef = ref(database, `users/${user.uid}`);
+    // Check if the user already exists
+    get(userRef).then((snapshot) => {
+      if (snapshot.exists()) {
+        console.log("User already exists in the database:", snapshot.val());
+        navigate('/dashboard')
+      } else {
+        // User doesn't exist, so save their info
+        set(userRef, {
+          uid: user.uid,
+          name: user.displayName,
+          email: user.email,
+          role: role,
+          profilePicture: user.photoURL,
+          lastLogin: new Date().toISOString()
+        })
+          .then(() => {
+            console.log("User data saved successfully!");
+            navigate('/dashboard')
+          })
+          .catch((error) => {
+            console.error("Error saving user data:", error);
+          });
+      }
+    }).catch((error) => {
+      console.error("Error fetching user data:", error);
+    });
+  }
+
 
   const validateEmail = (email) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -75,6 +131,7 @@ const Signin = () => {
 
     setLoading(true);
   };
+  
   return (
     <div className="h-screen flex">
       <div className="basis-[0%] lg:basis-[50%] bg-[url('./assets/signin.jpg')] bg-cover bg-no-repeat bg-top"></div>
@@ -137,16 +194,18 @@ const Signin = () => {
         </div>
 
         <div className="flex flex-col w-full gap-[20px]">
-            <button className="flex gap-[17px] justify-center bg-[#F9F8F8] rounded-[6px] items-center py-[18px] shadow-md shadow-[#00000040]">
-                <img src={google} alt="Google" width={30} height={30} />
-                <p>Continue  with Google</p>
-            </button>
+          <button className="flex gap-[17px] justify-center bg-[#F9F8F8] rounded-[6px] items-center py-[18px] shadow-md shadow-[#00000040]"
+            onClick={signinWithGoogle}
+          >
+            <img src={google} alt="Google" width={30} height={30} />
+            <p>Continue  with Google</p>
+          </button>
 
 
-            <button className="flex gap-[17px] justify-center bg-[#F9F8F8] rounded-[6px] items-center py-[18px] shadow-md shadow-[#00000040]">
-                <img src={facebook} alt="facebook" width={30} height={30} />
-                <p>Continue with Facebook</p>
-            </button>
+          <button className="flex gap-[17px] justify-center bg-[#F9F8F8] rounded-[6px] items-center py-[18px] shadow-md shadow-[#00000040]">
+            <img src={facebook} alt="facebook" width={30} height={30} />
+            <p>Continue with Facebook</p>
+          </button>
         </div>
       </div>
     </div>
