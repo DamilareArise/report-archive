@@ -9,6 +9,8 @@ import {
 } from "react-router-dom";
 import { initializeApp } from "firebase/app";
 import Dashboard from "./pages/Dashboard";
+import AdminDisplayThesis from "./pages/AdminDisplayThesis";
+import UserDisplayThesis from "./pages/UserDisplayThesis";
 
 function App() {
   // Your web app's Firebase configuration
@@ -34,6 +36,8 @@ function App() {
           <Route path="/" element={<LoginPage />} />
           <Route path="/signin/:role" element={<Signin  app={app}/>} />
           <Route path="/dashboard" element={<Dashboard/>}/>
+          <Route path="/admindisplay" element={<AdminDisplayThesis/>}/>
+          <Route path="/userdisplay" element={<UserDisplayThesis/>}/>
         </Routes>
       </Router>
     </>
