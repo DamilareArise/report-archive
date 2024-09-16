@@ -6,7 +6,7 @@ import facebook from './../assets/facebook.svg';
 import message from "../assets/message.svg";
 import passwordd from "../assets/password.svg";
 
-import { getAuth, signInWithPopup, GoogleAuthProvider } from "firebase/auth";
+import { getAuth, signInWithPopup, GoogleAuthProvider, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "firebase/auth";
 import { getDatabase, ref, set, get } from "firebase/database";
 import { useNavigate, useParams } from "react-router-dom";
 
@@ -24,6 +24,25 @@ const Signin = ({ app }) => {
   const auth = getAuth();
   const database = getDatabase(app);
 
+
+  const signin = ()=>{
+    signInWithEmailAndPassword(auth, email, password)
+    .then((userCredential) => {
+      // Signed up 
+      const user = userCredential.user;
+      console.log(user);
+      saveUserDetails(user)
+      
+    })
+    .catch((error) => {
+      const errorCode = error.code;
+      const errorMessage = error.message;
+      console.log(errorCode, errorMessage);
+      
+    });
+  }
+
+
   const signinWithGoogle = () => {
     signInWithPopup(auth, provider)
       .then((result) => {
@@ -33,9 +52,17 @@ const Signin = ({ app }) => {
 
       })
       .catch((error) => {
-        console.log('Error occured while sign in');
+        console.log('Error occured while sign in:', error);
 
       });
+  }
+
+  const checkRole = () =>{
+    if (role == 'user'){
+      navigate('/userdisplay')
+    } else if (role == 'admin'){
+      navigate('/admindisplay')
+    }
   }
 
   const saveUserDetails = (user) => {
@@ -44,7 +71,7 @@ const Signin = ({ app }) => {
     get(userRef).then((snapshot) => {
       if (snapshot.exists()) {
         console.log("User already exists in the database:", snapshot.val());
-        navigate('/dashboard')
+        checkRole()
       } else {
         // User doesn't exist, so save their info
         set(userRef, {
@@ -52,12 +79,12 @@ const Signin = ({ app }) => {
           name: user.displayName,
           email: user.email,
           role: role,
-          profilePicture: user.photoURL,
+          profilePicture: user.photoURL || '',
           lastLogin: new Date().toISOString()
         })
           .then(() => {
             console.log("User data saved successfully!");
-            navigate('/dashboard')
+            checkRole()
           })
           .catch((error) => {
             console.error("Error saving user data:", error);
@@ -176,6 +203,7 @@ const Signin = ({ app }) => {
             type="submit"
             className={`py-[18px] text-[#FFFFFF] bg-[#020252] rounded-[6px] w-full mb-[22px] md:text-[20px] font-[400] text-[16px]  hover:opacity-[75%]`}
             disabled={loading}
+            onClick={signin}
           >
             {loading ? "Loading..." : "Login"}
           </button>

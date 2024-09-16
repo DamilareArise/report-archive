@@ -1,9 +1,14 @@
-import React, { useState } from "react";
+
 import Navbar from "../components/Navbar";
 import upload from "./../assets/upload.png";
 import search from "./../assets/search.png";
 import arrowBack from "./../assets/arrowBack.png";
 import { Link } from "react-router-dom";
+
+import { useEffect, useState } from 'react'
+import { getAuth, onAuthStateChanged } from "firebase/auth";
+import { useNavigate } from 'react-router-dom';
+
 
 const UserDisplayThesis = () => {
     const [file, setFile] = useState(null);
@@ -11,8 +16,27 @@ const UserDisplayThesis = () => {
     const [description, setDescription] = useState("");
     const [submissionStatus, setSubmissionStatus] = useState(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [user, setUser] = useState(null);
     let thesis = null
-  
+
+    const auth = getAuth();
+    const navigate = useNavigate()
+   
+    useEffect(() => {
+      onAuthStateChanged(auth, (user) => {
+          if (user) {
+            console.log(user);
+            setUser(user);
+            
+          } else {
+              setUser(null);
+              navigate('/login')   
+          }
+      });
+        
+    }, [auth, navigate]);
+
+
    
     const handleFileChange = (e) => {
       setFile(e.target.files[0]);
@@ -107,7 +131,7 @@ const UserDisplayThesis = () => {
 
   return (
     <div className="bg-[#F4F4F4]">
-      <Navbar />
+      <Navbar user={user}/>
       <div>
         <div className="flex flex-col md:flex-row justify-between items-center px-[24px] md:px-[41px] py-[38px]">
           <Link to={"/"} className="self-start md:self-center">
