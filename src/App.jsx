@@ -8,7 +8,6 @@ import {
   Navigate,
 } from "react-router-dom";
 import { initializeApp } from "firebase/app";
-import Dashboard from "./pages/Dashboard";
 import AdminDisplayThesis from "./pages/AdminDisplayThesis";
 import UserDisplayThesis from "./pages/UserDisplayThesis";
 
@@ -30,14 +29,12 @@ function App() {
 
   return (
     <>
-  
       <Router>
         <Routes>
           <Route path="/" element={<LoginPage />} />
           <Route path="/signin/:role" element={<Signin  app={app}/>} />
-          <Route path="/dashboard" element={<Dashboard/>}/>
           <Route path="/admindisplay" element={<AdminDisplayThesis/>}/>
-          <Route path="/userdisplay" element={<UserDisplayThesis/>}/>
+          <Route path="/userdisplay" element={<UserDisplayThesis app={app} /> }/>
         </Routes>
       </Router>
     </>

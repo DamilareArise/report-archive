@@ -1,16 +1,17 @@
 
+import { useEffect, useState } from 'react'
 import Navbar from "../components/Navbar";
 import upload from "./../assets/upload.png";
 import search from "./../assets/search.png";
 import arrowBack from "./../assets/arrowBack.png";
 import { Link } from "react-router-dom";
-
-import { useEffect, useState } from 'react'
+import { getStorage, ref as storageRef } from "firebase/storage";
+import { getDatabase, ref, set, get } from "firebase/database";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { useNavigate } from 'react-router-dom';
 
 
-const UserDisplayThesis = () => {
+const UserDisplayThesis = ({ app }) => {
     const [file, setFile] = useState(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [description, setDescription] = useState("");
@@ -18,14 +19,15 @@ const UserDisplayThesis = () => {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [user, setUser] = useState(null);
     let thesis = null
-
     const auth = getAuth();
+    const storage = getStorage()
+    const database = getDatabase(app);
     const navigate = useNavigate()
+    
    
     useEffect(() => {
       onAuthStateChanged(auth, (user) => {
           if (user) {
-            console.log(user);
             setUser(user);
             
           } else {
@@ -35,6 +37,40 @@ const UserDisplayThesis = () => {
       });
         
     }, [auth, navigate]);
+
+    const uploadFile = () =>{
+      
+          let fileDetails;
+      
+          if (file){
+      
+            let fileDetails = {
+              fileName: file['name'],
+              author: user.displayName,
+              date_created: new Date().toLocaleString()
+            }
+          }
+          const thesisRef = ref(database, `thesis/${user.uid}/${fileDetails.fileName}`);
+          get(thesisRef).then((snapshot) => {
+            if (snapshot.exists()) {
+              console.log("Thesis exists in the database:", snapshot.val());
+              
+            } else {
+              // User doesn't exist, so save their info
+              set(thesisRef, fileDetails)
+                .then(() => {
+                  console.log("Thesis saved successfully!");
+                  
+                })
+                .catch((error) => {
+                  console.error("Error saving thesis data:", error);
+                });
+            }
+          }).catch((error) => {
+            console.error("Error fetching thesis data:", error);
+          });
+
+    }
 
 
    
