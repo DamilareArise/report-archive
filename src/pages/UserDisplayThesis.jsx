@@ -1,71 +1,155 @@
-
+import { useEffect, useState } from "react";
 import Navbar from "../components/Navbar";
 import upload from "./../assets/upload.png";
 import search from "./../assets/search.png";
 import arrowBack from "./../assets/arrowBack.png";
 import { Link } from "react-router-dom";
-
-import { useEffect, useState } from 'react'
+import {
+  getStorage,
+  ref as storeRef,
+  uploadBytesResumable,
+  getDownloadURL,
+} from "firebase/storage";
+import { getDatabase, ref, set, get, onValue } from "firebase/database";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from "react-router-dom";
 
-
-const UserDisplayThesis = () => {
-    const [file, setFile] = useState(null);
-    const [isModalOpen, setIsModalOpen] = useState(false);
-    const [description, setDescription] = useState("");
-    const [submissionStatus, setSubmissionStatus] = useState(null);
-    const [isSubmitting, setIsSubmitting] = useState(false);
-    const [user, setUser] = useState(null);
-    let thesis = null
-
-    const auth = getAuth();
-    const navigate = useNavigate()
-   
-    useEffect(() => {
-      onAuthStateChanged(auth, (user) => {
-          if (user) {
-            console.log(user);
-            setUser(user);
-            
-          } else {
-              setUser(null);
-              navigate('/login')   
-          }
-      });
-        
-    }, [auth, navigate]);
-
-
-   
-    const handleFileChange = (e) => {
-      setFile(e.target.files[0]);
-      setIsModalOpen(true); 
-      setSubmissionStatus(null);
-    };
+const UserDisplayThesis = ({ app }) => {
+  const [file, setFile] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [description, setDescription] = useState("");
+  const [submissionStatus, setSubmissionStatus] = useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [thesisList, setThesisList] = useState([])
+  const [user, setUser] = useState(null);
   
-   
-    const handleSubmit = () => {
-      setIsSubmitting(true);
-      if (file && description) {
-        
-        setTimeout(() => {
-          setSubmissionStatus("success");
-          setIsSubmitting(false);
-        }, 2000); 
+  const auth = getAuth();
+  const storage = getStorage();
+  const database = getDatabase(app);
+  const navigate = useNavigate();
+  console.log(thesisList);
+  
+  useEffect(() => {
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        setUser(user);
       } else {
-        setSubmissionStatus("failure");
-        setIsSubmitting(false);
+        setUser(null);
+        navigate("/login");
       }
-    };
+    });
 
+    const thesisRef = ref(database, `thesis/`);
+
+    // Using onValue to listen to the data in real-time
+    onValue(thesisRef, (snapshot) => {
+      const data = snapshot.val();
+      if (data) {
+        // Convert the object into an array of thesis data
+        const thesisArray = Object.keys(data).map((userId) => {
+          return { userId, ...data[userId] };
+        });
+
+        // Update state with the thesis list
+        setThesisList(thesisArray);
+      }
+    });
+  }, [auth, navigate]);
+
+  const uploadFile = () => {
+    let fileDetails;
+
+    if (file) {
+      fileDetails = {
+        fileName: file["name"],
+        author: user.displayName,
+        date_created: new Date().toLocaleString(),
+      };
+    }
+
+    // Sanitize the file name by encoding it
+    const sanitizedFileName = fileDetails.fileName.replace(/[ .#$[\]]/g, "_");
+
+    const thesisRef_db = ref(
+      database,
+      `thesis/${user.uid}/${sanitizedFileName}`
+    );
+    get(thesisRef_db)
+      .then((snapshot) => {
+        if (snapshot.exists()) {
+          console.log("Thesis exists in the database:", snapshot.val());
+        } else {
+          console.log("Thesis does not exist in the database");
+          let thesisRef = storeRef(
+            storage,
+            `thesis/${user.uid}/${fileDetails.fileName}`
+          );
+          const uploadTask = uploadBytesResumable(thesisRef, file);
+
+          uploadTask.on(
+            "state_changed",
+            (snapshot) => {
+              const progress =
+                (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+              console.log("Upload is " + progress + "% done");
+            },
+            (error) => {
+              // Handle unsuccessful uploads
+              console.error("Upload failed:", error);
+            },
+            () => {
+              // Handle successful uploads on complete
+              console.log("Upload complete.");
+              // Get the uploaded file's Storage Reference
+              getDownloadURL(thesisRef).then((downloadURL) => {
+                set(thesisRef_db, { ...fileDetails, downloadURL })
+                  .then(() => {
+                    console.log("Thesis saved successfully with download URL!");
+                  })
+                  .catch((error) => {
+                    console.error(
+                      "Error saving thesis data with download URL:",
+                      error
+                    );
+                  });
+              });
+            }
+          );
+        }
+      })
+      .catch((error) => {
+        console.error("Error fetching thesis data:", error);
+      });
+  };
+
+  const handleFileChange = (e) => {
+    setFile(e.target.files[0]);
+    setIsModalOpen(true);
+    setSubmissionStatus(null);
+  };
+
+  const handleSubmit = () => {
+    setIsSubmitting(true);
+    if (file && description) {
+      uploadFile();
+      setTimeout(() => {
+        setSubmissionStatus("success");
+        setIsSubmitting(false);
+      }, 2000);
+    } else {
+      setSubmissionStatus("failure");
+      setIsSubmitting(false);
+    }
+  };
 
   const renderModal = () => (
     <div className="fixed inset-0 bg-gray-900 bg-opacity-75 flex justify-center items-center">
       <div className="bg-white p-6 rounded-lg shadow-lg w-[600px]">
         {submissionStatus === null ? (
           <>
-            <h2 className="text-lg font-bold mb-[13px]">Enter Thesis Description:</h2>
+            <h2 className="text-lg font-bold mb-[13px]">
+              Enter Thesis Description:
+            </h2>
             <textarea
               value={description}
               onChange={(e) => setDescription(e.target.value)}
@@ -76,24 +160,24 @@ const UserDisplayThesis = () => {
             />
 
             <div className="flex justify-between">
-            <button
-              onClick={() => setIsModalOpen(false)}
-              className="ml-4 bg-gray-500 text-white px-4 py-2 rounded"
-              disabled={isSubmitting}
-            >
-              Cancel
-            </button>
+              <button
+                onClick={() => setIsModalOpen(false)}
+                className="ml-4 bg-gray-500 text-white px-4 py-2 rounded"
+                disabled={isSubmitting}
+              >
+                Cancel
+              </button>
 
-
-            <button
-              onClick={handleSubmit}
-              className={`bg-[#020252] text-white px-4 py-2 rounded ${isSubmitting ? 'opacity-50 cursor-not-allowed' : ''}`}
-              disabled={isSubmitting}
-            >
-              {isSubmitting ? "Submitting..." : "Submit"}
-            </button>
+              <button
+                onClick={handleSubmit}
+                className={`bg-[#020252] text-white px-4 py-2 rounded ${
+                  isSubmitting ? "opacity-50 cursor-not-allowed" : ""
+                }`}
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? "Submitting..." : "Submit"}
+              </button>
             </div>
-            
           </>
         ) : submissionStatus === "success" ? (
           <div className="text-center">
@@ -128,10 +212,9 @@ const UserDisplayThesis = () => {
     </div>
   );
 
-
   return (
     <div className="bg-[#F4F4F4]">
-      <Navbar user={user}/>
+      <Navbar user={user} />
       <div>
         <div className="flex flex-col md:flex-row justify-between items-center px-[24px] md:px-[41px] py-[38px]">
           <Link to={"/"} className="self-start md:self-center">
@@ -174,7 +257,7 @@ const UserDisplayThesis = () => {
             </thead>
 
             <tbody>
-              {thesis === null ? (
+              {thesisList === null ? (
                 <tr className="bg-[#F4F4F4] mb-[15px] shadow-md shadow-[#00000040] border-spacing-x-[18px]">
                   <td className="text-center pt-[26px] pb-[18px]">1</td>
                   <td className="text-start pt-[26px] pb-[18px]  /truncate">
@@ -187,20 +270,19 @@ const UserDisplayThesis = () => {
                   <td className="text-center pt-[26px] pb-[18px]">July, 24</td>
                 </tr>
               ) : (
-                thesis.map((thesis, index) => (
+                thesisList.map((thesis, index) => (
                   <tr
                     key={index}
                     className="bg-[#F4F4F4] mb-[15px] shadow-md shadow-[#00000040]"
                   >
                     <td className="pt-[26px] pb-[18px]">{index + 1}</td>
-                    <td className="pt-[26px] pb-[18px]">{thesis.title}</td>
+                    <td className="pt-[26px] pb-[18px]">{thesis.fileName}</td>
                     <td className="pt-[26px] pb-[18px]">{thesis.author}</td>
-                    <td className="pt-[26px] pb-[18px]">{thesis.year}</td>
+                    <td className="pt-[26px] pb-[18px]">{thesis.date_created}</td>
                     <td className="pt-[26px] pb-[18px]">
                       {thesis.lastModified}
                     </td>
                   </tr>
-                  
                 ))
               )}
             </tbody>
