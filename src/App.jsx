@@ -11,6 +11,7 @@ import { initializeApp } from "firebase/app";
 import Dashboard from "./pages/Dashboard";
 import AdminDisplayThesis from "./pages/AdminDisplayThesis";
 import UserDisplayThesis from "./pages/UserDisplayThesis";
+import AdminDashboard from "./pages/AdminDashboard";
 
 function App() {
   // Your web app's Firebase configuration
@@ -38,6 +39,7 @@ function App() {
           <Route path="/dashboard" element={<Dashboard/>}/>
           <Route path="/admindisplay" element={<AdminDisplayThesis/>}/>
           <Route path="/userdisplay" element={<UserDisplayThesis/>}/>
+          <Route path="/adminDash" element={<AdminDashboard/>}/>
         </Routes>
       </Router>
     </>
