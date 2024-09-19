@@ -16,7 +16,7 @@ const UserDisplayThesis = ({ app }) => {
   const auth = getAuth();
   const database = getDatabase(app);
   const navigate = useNavigate();
-  console.log(thesisList);
+  // console.log(thesisList);
 
   useEffect(() => {
     onAuthStateChanged(auth, (user) => {

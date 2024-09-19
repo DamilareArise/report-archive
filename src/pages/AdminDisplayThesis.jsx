@@ -2,9 +2,51 @@
 import del from "./../assets/delete.png";
 import edit from "./../assets/edit.png";
 import upload from "./../assets/upload.png";
+import { getDatabase, ref, onValue } from "firebase/database";
+import { getAuth, onAuthStateChanged } from "firebase/auth";
+import { useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
 
-const AdminDisplayThesis = () => {
-  let thesis = null;
+const AdminDisplayThesis = ({ app }) => {
+
+  const [thesisList, setThesisList] = useState([]);
+  const [user, setUser] = useState(null);
+
+  const auth = getAuth();
+  const database = getDatabase(app);
+  const navigate = useNavigate();
+
+
+  useEffect(() => {
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        setUser(user);
+      } else {
+        setUser(null);
+        navigate("/login");
+      }
+    });
+
+    const thesisRef = ref(database, `thesis/`);
+
+    // Using onValue to listen to the data in real-time
+    onValue(thesisRef, (snapshot) => {
+      const data = snapshot.val();
+      if (data) {
+        // Convert the object into an array of thesis data
+        const thesisArray = Object.keys(data).map((userId) => {
+          return { userId, ...data[userId] };
+        });
+        console.log(thesisArray);
+
+        // Update state with the thesis list
+        setThesisList(thesisArray);
+      }
+    });
+  }, [auth, navigate]);
+
+
+
   return (
     <div>
       <div className="flex">
@@ -21,14 +63,14 @@ const AdminDisplayThesis = () => {
                     <th className="pt-[45px] pb-[20px] w-[5%]">S/N</th>
                     <th className="pt-[45px] pb-[20px] w-[30%]">Title</th>
                     <th className="pt-[45px] pb-[20px] w-[20%]">Author</th>
-                    <th className="pt-[45px] pb-[20px] w-[10%] xl:w-[20%]">Year</th>
+                    {/* <th className="pt-[45px] pb-[20px] w-[10%] xl:w-[20%]">Year</th> */}
                     <th className="pt-[45px] pb-[20px] w-[15%]">Last modi...</th>
                     <th className="pt-[45px] pb-[20px] w-[20%] xl:w-[15%]"></th>
                   </tr>
                 </thead>
 
                 <tbody>
-                  {thesis === null ? (
+                  {thesisList === null ? (
                     <tr className="bg-[#F4F4F4] mb-[15px] shadow shadow-[#00000040]">
                       <td className="text-center pt-[26px] pb-[18px]">1</td>
                       <td className="text-start pt-[26px] pb-[18px]  /truncate">
@@ -58,16 +100,21 @@ const AdminDisplayThesis = () => {
                       </td>
                     </tr>
                   ) : (
-                    thesis.map((thesis, index) => (
+                    thesisList.map((thesis, index) => {
+                      const documentKey = Object.keys(thesis).find(
+                        (key) => key !== "userId"
+                      );
+                      const documentData = thesis[documentKey];
+                      return (
                       <tr
                         key={index}
                         className="bg-[#F4F4F4] mb-[15px] shadow-md shadow-[#00000040]"
                       >
-                        <td className="pt-[26px] pb-[18px]">{index + 1}</td>
-                        <td className="pt-[26px] pb-[18px]">{thesis.title}</td>
-                        <td className="pt-[26px] pb-[18px]">{thesis.author}</td>
-                        <td className="pt-[26px] pb-[18px]">{thesis.year}</td>
-                        <td className="pt-[26px] pb-[18px]">{thesis.lastModified}</td>
+                        <td className="pt-[26px] pb-[18px] text-center">{index + 1}</td>
+                        <td className="pt-[26px] pb-[18px] text-center">{documentData.fileName}</td>
+                        <td className="pt-[26px] pb-[18px] text-center">{documentData.author}</td>
+                        {/* <td className="pt-[26px] pb-[18px]">{thesis.year}</td> */}
+                        <td className="pt-[26px] pb-[18px] text-center">{documentData.date_created}</td>
                         <td className="pt-[35px] pb-[18px] flex gap-[10px] justify-center items-center h-full">
                           <img
                             src={upload}
@@ -86,7 +133,8 @@ const AdminDisplayThesis = () => {
                           />
                         </td>
                       </tr>
-                    ))
+                      )
+                    })
                   )}
                 </tbody>
               </table>

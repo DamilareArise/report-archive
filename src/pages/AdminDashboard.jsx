@@ -1,13 +1,34 @@
 // import React from "react";
-import Navbar from "../components/Navbar";
+
 import ham from "./../assets/hamburger.svg";
 import user from "./../assets/user.svg";
 import back from './../assets/back.svg';
 import forward from './../assets/forward.svg';
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { getAuth, onAuthStateChanged } from "firebase/auth";
+
 const AdminDashboard = () => {
+  const [signuser, setUser] = useState(null);
+
   let activities = null;
   let users = null;
+  const auth = getAuth();
+  const navigate = useNavigate()
+
+  useEffect(() => {
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        setUser(user);  
+      } else {
+        setUser(null);
+        navigate("/login");
+      }
+    });
+  }, [auth])
+
+
+  
   return (
     <div className="pt-[41px] px-[20px] md:px-[50px] bg-[#F4F4F4]">
       {/* <Navbar/> */}
@@ -27,11 +48,11 @@ const AdminDashboard = () => {
           <img src={user} alt="" />
           <span className="flex flex-col gap-[10px]">
             <p className="font-[600] text-[20px] leading-[24.2px]">
-              Name<span className="ml-[17px] font-[400]">Fasanya Favour</span>
+              Name<span className="ml-[17px] font-[400] uppercase">{signuser ? signuser.displayName : ''}</span>
             </p>
-            <p className="font-[600] text-[20px] leading-[24.2px]">
+            {/* <p className="font-[600] text-[20px] leading-[24.2px]">
               Status<span className="ml-[17px]"></span>
-            </p>
+            </p> */}
           </span>
         </div>
 
@@ -178,7 +199,7 @@ const AdminDashboard = () => {
 
           <div className="flex items-center gap-[10px] mt-[48px] self-end">
             <Link to={'/'}><img src={back} alt="" /></Link>
-            <span className="font-[700] py-[6] px-[16px] text-[32px] text-white bg-[#020252] rounded-[9px]">{1}</span>
+            <span className="font-[500] py-[6] px-[16px] text-[20px] text-white bg-[#020252] rounded-[9px]">{1}</span>
             <Link to={'/'}><img src={forward} alt="" /></Link>
           </div>
         </div>
