@@ -3,6 +3,7 @@ import Navbar from "../components/Navbar";
 import upload from "./../assets/upload.png";
 import search from "./../assets/search.png";
 import arrowBack from "./../assets/arrowBack.png";
+import download from "./../assets/download.svg"
 import { Link } from "react-router-dom";
 import {
   getStorage,
@@ -20,15 +21,15 @@ const UserDisplayThesis = ({ app }) => {
   const [description, setDescription] = useState("");
   const [submissionStatus, setSubmissionStatus] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [thesisList, setThesisList] = useState([])
+  const [thesisList, setThesisList] = useState([]);
   const [user, setUser] = useState(null);
-  
+
   const auth = getAuth();
   const storage = getStorage();
   const database = getDatabase(app);
   const navigate = useNavigate();
   console.log(thesisList);
-  
+
   useEffect(() => {
     onAuthStateChanged(auth, (user) => {
       if (user) {
@@ -230,29 +231,32 @@ const UserDisplayThesis = ({ app }) => {
           </div>
 
           <div className="relative self-end mt-[30px] md:mt-0">
-            <button className="flex items-center py-[11px] px-[23px] bg-[#FFFFFF] shadow-md shadow-[#00000040] rounded-[25px]">
+            <Link
+              to={"/userUpload"}
+              className="flex items-center py-[11px] px-[23px] bg-[#FFFFFF] shadow-md shadow-[#00000040] rounded-[25px]"
+            >
               <img src={upload} alt="Upload" />
               <p className="ml-2">Upload Thesis</p>
-            </button>
-            <input
+            </Link>
+            {/* <input
               type="file"
               onChange={handleFileChange}
               className="absolute inset-0 opacity-0 cursor-pointer"
               accept=".pdf,.doc,.docx"
-            />
+            /> */}
           </div>
         </div>
 
-        <div className="overflow-x-auto md:px-[41px] xl:px-[168px] w-full ">
+        <div className="overflow-x-auto md:px-[41px] xl:px-[50px] w-full ">
           <table className="/bg-[#F8F4F8] min-w-[600px]">
             <thead>
               <tr className="pt-[45px] pb-[20px]">
                 <th className="pt-[45px] pb-[20px] w-[5%]">S/N</th>
-                <th className="pt-[45px] pb-[20px] w-[30%]">Title</th>
+                <th className="pt-[45px] pb-[20px] w-[25%]">Title</th>
                 <th className="pt-[45px] pb-[20px] w-[20%]">Author</th>
-                <th className="pt-[45px] pb-[20px] w-[10%] xl:w-[20%]">Year</th>
+                <th className="pt-[45px] pb-[20px] w-[15%] /xl:w-[15%]">Year</th>
                 <th className="pt-[45px] pb-[20px] w-[15%]">Last modi...</th>
-                {/* <th className="pt-[45px] pb-[20px] w-[20%] xl:w-[15%]"></th> */}
+                <th className="pt-[45px] pb-[20px] w-[20%] /xl:w-[15%]"></th>
               </tr>
             </thead>
 
@@ -278,9 +282,20 @@ const UserDisplayThesis = ({ app }) => {
                     <td className="pt-[26px] pb-[18px]">{index + 1}</td>
                     <td className="pt-[26px] pb-[18px]">{thesis.fileName}</td>
                     <td className="pt-[26px] pb-[18px]">{thesis.author}</td>
-                    <td className="pt-[26px] pb-[18px]">{thesis.date_created}</td>
+                    <td className="pt-[26px] pb-[18px]">
+                      {thesis.date_created}
+                    </td>
                     <td className="pt-[26px] pb-[18px]">
                       {thesis.lastModified}
+                    </td>
+                    <td>
+                      <a
+                       href=""
+                        className="flex items-center py-[11px] px-[23px] bg-[#020252] text-[#FFFFFF] shadow-md shadow-[#00000040] rounded-[25px]"
+                      >
+                        <img src={download} alt="download" />
+                        <p className="ml-2">Download Thesis</p>
+                      </a>
                     </td>
                   </tr>
                 ))
