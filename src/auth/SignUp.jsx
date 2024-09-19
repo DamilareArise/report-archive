@@ -4,6 +4,7 @@ import facebook from "./../assets/facebook.svg";
 import edit from "./../assets/edit.png";
 import message from "../assets/message.svg";
 import passwordd from "../assets/password.svg";
+import { getAuth, createUserWithEmailAndPassword } from "firebase/auth";
 
 const SignUp = () => {
   const [fullname, setFullname] = useState("");
@@ -14,6 +15,27 @@ const SignUp = () => {
   const [passwordError, setPasswordError] = useState("");
   const [confirmPasswordError, setConfirmPasswordError] = useState("");
   const [loading, setLoading] = useState(false);
+  const auth = getAuth();
+
+
+
+  const signupUser = () =>{
+    createUserWithEmailAndPassword(auth, email, password)
+    .then((userCredential) => {
+      // Signed up 
+      const user = userCredential.user;
+      console.log(user);
+      // ...
+    })
+    .catch((error) => {
+      const errorCode = error.code;
+      const errorMessage = error.message;
+      
+      // ..
+    });
+  }
+
+
 
   const validateEmail = (email) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;

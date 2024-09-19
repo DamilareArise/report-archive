@@ -41,7 +41,7 @@ const UserUpload = ({ app }) => {
   const auth = getAuth();
   const storage = getStorage();
   const database = getDatabase(app);
-  
+
   useEffect(() => {
     onAuthStateChanged(auth, (user) => {
       if (user) {
@@ -156,7 +156,7 @@ const UserUpload = ({ app }) => {
 
   return (
     <div className="/min-h-screen bg-gray-100 /p-6">
-      <Navbar />
+      <Navbar user={user}/>
 
       {/* Form */}
       <div className="bg-white max-w-4xl mx-auto mt-10 p-8 shadow-md rounded-md">
