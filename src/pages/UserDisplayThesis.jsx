@@ -3,7 +3,7 @@ import Navbar from "../components/Navbar";
 import upload from "./../assets/upload.png";
 import search from "./../assets/search.png";
 import arrowBack from "./../assets/arrowBack.png";
-import download from "./../assets/download.svg"
+import download from "./../assets/download.svg";
 import { Link } from "react-router-dom";
 import {
   getStorage,
@@ -51,9 +51,9 @@ const UserDisplayThesis = ({ app }) => {
           return { userId, ...data[userId] };
         });
         console.log(thesisArray);
-        
+
         // Update state with the thesis list
-        setThesisList(thesisArray); 
+        setThesisList(thesisArray);
       }
     });
   }, [auth, navigate]);
@@ -255,7 +255,9 @@ const UserDisplayThesis = ({ app }) => {
                 <th className="pt-[45px] pb-[20px] w-[5%]">S/N</th>
                 <th className="pt-[45px] pb-[20px] w-[25%]">Title</th>
                 <th className="pt-[45px] pb-[20px] w-[20%]">Author</th>
-                <th className="pt-[45px] pb-[20px] w-[10%] xl:w-[20%]">Last modi...</th>
+                <th className="pt-[45px] pb-[20px] w-[10%] xl:w-[20%]">
+                  Last modi...
+                </th>
                 <th className="pt-[45px] pb-[20px] w-[15%]">Download</th>
                 {/* <th className="pt-[45px] pb-[20px] w-[20%] xl:w-[15%]"></th> */}
               </tr>
@@ -276,23 +278,41 @@ const UserDisplayThesis = ({ app }) => {
                 </tr>
               ) : (
                 thesisList.map((thesis, index) => {
-                  const documentKey = Object.keys(thesis).find(key => key !== 'userId');
+                  const documentKey = Object.keys(thesis).find(
+                    (key) => key !== "userId"
+                  );
                   const documentData = thesis[documentKey];
-                
+
                   return (
                     <tr
                       key={index}
                       className="bg-[#F4F4F4] mb-[15px] shadow-md shadow-[#00000040]"
                     >
                       <td className="pt-[26px] pb-[18px]">{index + 1}</td>
-                      <td className="pt-[26px] pb-[18px]">{documentData.fileName}</td>
-                      <td className="pt-[26px] pb-[18px] uppercase">{documentData.author}</td>
-                      <td className="pt-[26px] pb-[18px]">{documentData.date_created}</td>
-                      <td className="pt-[26px] pb-[18px]">{documentData.lastModified}</td>
+                      <td className="pt-[26px] pb-[18px]">
+                        {documentData.fileName}
+                      </td>
+                      <td className="pt-[26px] pb-[18px] uppercase">
+                        {documentData.author}
+                      </td>
+                      <td className="pt-[26px] pb-[18px]">
+                        {documentData.date_created}
+                      </td>
+                      <td className="pt-[26px] pb-[18px]">
+                        {documentData.lastModified}
+                      </td>
+                      <td>
+                        <a
+                          href=""
+                          className="flex items-center py-[11px] px-[23px] bg-[#020252] text-[#FFFFFF] shadow-md shadow-[#00000040] rounded-[25px]"
+                        >
+                          <img src={download} alt="download" />
+                          <p className="ml-2">Download Thesis</p>
+                        </a>
+                      </td>
                     </tr>
                   );
                 })
-                
               )}
             </tbody>
           </table>
