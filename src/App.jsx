@@ -13,6 +13,7 @@ import UserDisplayThesis from "./pages/UserDisplayThesis";
 import AdminDashboard from "./pages/AdminDashboard";
 import SupervisorDashboard from "./pages/SupervisorDashboard";
 import SupervisorApproval from "./pages/SupervisorApproval";
+import UserUpload from "./pages/UserUpload";
 
 function App() {
   // Your web app's Firebase configuration
@@ -41,6 +42,7 @@ function App() {
           <Route path="/admindashboard" element={<AdminDashboard />} />
           <Route path="/supervisordashboard" element={<SupervisorDashboard/>} />
           <Route path="/supervisorApproval" element={<SupervisorApproval/>} />
+          <Route path="/userUpload" element={<UserUpload/>} />
         </Routes>
       </Router>
     </>
