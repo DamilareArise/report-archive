@@ -50,9 +50,10 @@ const UserDisplayThesis = ({ app }) => {
         const thesisArray = Object.keys(data).map((userId) => {
           return { userId, ...data[userId] };
         });
-
+        console.log(thesisArray);
+        
         // Update state with the thesis list
-        setThesisList(thesisArray);
+        setThesisList(thesisArray); 
       }
     });
   }, [auth, navigate]);
@@ -254,9 +255,9 @@ const UserDisplayThesis = ({ app }) => {
                 <th className="pt-[45px] pb-[20px] w-[5%]">S/N</th>
                 <th className="pt-[45px] pb-[20px] w-[25%]">Title</th>
                 <th className="pt-[45px] pb-[20px] w-[20%]">Author</th>
-                <th className="pt-[45px] pb-[20px] w-[15%] /xl:w-[15%]">Year</th>
-                <th className="pt-[45px] pb-[20px] w-[15%]">Last modi...</th>
-                <th className="pt-[45px] pb-[20px] w-[20%] /xl:w-[15%]"></th>
+                <th className="pt-[45px] pb-[20px] w-[10%] xl:w-[20%]">Last modi...</th>
+                <th className="pt-[45px] pb-[20px] w-[15%]">Download</th>
+                {/* <th className="pt-[45px] pb-[20px] w-[20%] xl:w-[15%]"></th> */}
               </tr>
             </thead>
 
@@ -274,31 +275,24 @@ const UserDisplayThesis = ({ app }) => {
                   <td className="text-center pt-[26px] pb-[18px]">July, 24</td>
                 </tr>
               ) : (
-                thesisList.map((thesis, index) => (
-                  <tr
-                    key={index}
-                    className="bg-[#F4F4F4] mb-[15px] shadow-md shadow-[#00000040]"
-                  >
-                    <td className="pt-[26px] pb-[18px]">{index + 1}</td>
-                    <td className="pt-[26px] pb-[18px]">{thesis.fileName}</td>
-                    <td className="pt-[26px] pb-[18px]">{thesis.author}</td>
-                    <td className="pt-[26px] pb-[18px]">
-                      {thesis.date_created}
-                    </td>
-                    <td className="pt-[26px] pb-[18px]">
-                      {thesis.lastModified}
-                    </td>
-                    <td>
-                      <a
-                       href=""
-                        className="flex items-center py-[11px] px-[23px] bg-[#020252] text-[#FFFFFF] shadow-md shadow-[#00000040] rounded-[25px]"
-                      >
-                        <img src={download} alt="download" />
-                        <p className="ml-2">Download Thesis</p>
-                      </a>
-                    </td>
-                  </tr>
-                ))
+                thesisList.map((thesis, index) => {
+                  const documentKey = Object.keys(thesis).find(key => key !== 'userId');
+                  const documentData = thesis[documentKey];
+                
+                  return (
+                    <tr
+                      key={index}
+                      className="bg-[#F4F4F4] mb-[15px] shadow-md shadow-[#00000040]"
+                    >
+                      <td className="pt-[26px] pb-[18px]">{index + 1}</td>
+                      <td className="pt-[26px] pb-[18px]">{documentData.fileName}</td>
+                      <td className="pt-[26px] pb-[18px] uppercase">{documentData.author}</td>
+                      <td className="pt-[26px] pb-[18px]">{documentData.date_created}</td>
+                      <td className="pt-[26px] pb-[18px]">{documentData.lastModified}</td>
+                    </tr>
+                  );
+                })
+                
               )}
             </tbody>
           </table>

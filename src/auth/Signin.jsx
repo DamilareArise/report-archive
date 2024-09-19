@@ -61,7 +61,9 @@ const Signin = ({ app }) => {
     if (role == 'user'){
       navigate('/userdisplay')
     } else if (role == 'admin'){
-      navigate('/admindisplay')
+      navigate('/admindashboard')
+    }else if (role == 'supervisor'){
+      navigate('/supervisordashboard')
     }
   }
 
