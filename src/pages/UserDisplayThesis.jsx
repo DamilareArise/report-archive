@@ -49,9 +49,10 @@ const UserDisplayThesis = ({ app }) => {
         const thesisArray = Object.keys(data).map((userId) => {
           return { userId, ...data[userId] };
         });
-
+        console.log(thesisArray);
+        
         // Update state with the thesis list
-        setThesisList(thesisArray);
+        setThesisList([thesisArray]); 
       }
     });
   }, [auth, navigate]);
