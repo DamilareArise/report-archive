@@ -13,7 +13,7 @@ const AdminDashboard = () => {
       {/* <Navbar/> */}
       <div className="flex justify-end mb-[52px]">
         <Link
-          to={""}
+          to={"/admindisplay"}
           className="px-[23px] py-[11px] bg-[#FFFFFF] rounded-[25px] flex gap-[10px] shadow-md shadow-[#00000040]"
         >
           <img src={ham} alt="" />
