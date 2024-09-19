@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import Navbar from "../components/Navbar";
 import upload from "./../assets/upload.png";
 import search from "./../assets/search.png";
-import arrowBack from "./../assets/arrowBack.png";
+// import arrowBack from "./../assets/arrowBack.png";
 import download from "./../assets/download.svg";
 import { Link } from "react-router-dom";
 import { getDatabase, ref, onValue } from "firebase/database";
