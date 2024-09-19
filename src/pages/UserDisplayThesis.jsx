@@ -5,27 +5,15 @@ import search from "./../assets/search.png";
 import arrowBack from "./../assets/arrowBack.png";
 import download from "./../assets/download.svg";
 import { Link } from "react-router-dom";
-import {
-  getStorage,
-  ref as storeRef,
-  uploadBytesResumable,
-  getDownloadURL,
-} from "firebase/storage";
-import { getDatabase, ref, set, get, onValue } from "firebase/database";
+import { getDatabase, ref, onValue } from "firebase/database";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { useNavigate } from "react-router-dom";
 
 const UserDisplayThesis = ({ app }) => {
-  const [file, setFile] = useState(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [description, setDescription] = useState("");
-  const [submissionStatus, setSubmissionStatus] = useState(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [thesisList, setThesisList] = useState([]);
   const [user, setUser] = useState(null);
 
   const auth = getAuth();
-  const storage = getStorage();
   const database = getDatabase(app);
   const navigate = useNavigate();
   console.log(thesisList);
@@ -58,161 +46,6 @@ const UserDisplayThesis = ({ app }) => {
     });
   }, [auth, navigate]);
 
-  const uploadFile = () => {
-    let fileDetails;
-
-    if (file) {
-      fileDetails = {
-        fileName: file["name"],
-        author: user.displayName,
-        date_created: new Date().toLocaleString(),
-      };
-    }
-
-    // Sanitize the file name by encoding it
-    const sanitizedFileName = fileDetails.fileName.replace(/[ .#$[\]]/g, "_");
-
-    const thesisRef_db = ref(
-      database,
-      `thesis/${user.uid}/${sanitizedFileName}`
-    );
-    get(thesisRef_db)
-      .then((snapshot) => {
-        if (snapshot.exists()) {
-          console.log("Thesis exists in the database:", snapshot.val());
-        } else {
-          console.log("Thesis does not exist in the database");
-          let thesisRef = storeRef(
-            storage,
-            `thesis/${user.uid}/${fileDetails.fileName}`
-          );
-          const uploadTask = uploadBytesResumable(thesisRef, file);
-
-          uploadTask.on(
-            "state_changed",
-            (snapshot) => {
-              const progress =
-                (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-              console.log("Upload is " + progress + "% done");
-            },
-            (error) => {
-              // Handle unsuccessful uploads
-              console.error("Upload failed:", error);
-            },
-            () => {
-              // Handle successful uploads on complete
-              console.log("Upload complete.");
-              // Get the uploaded file's Storage Reference
-              getDownloadURL(thesisRef).then((downloadURL) => {
-                set(thesisRef_db, { ...fileDetails, downloadURL })
-                  .then(() => {
-                    console.log("Thesis saved successfully with download URL!");
-                  })
-                  .catch((error) => {
-                    console.error(
-                      "Error saving thesis data with download URL:",
-                      error
-                    );
-                  });
-              });
-            }
-          );
-        }
-      })
-      .catch((error) => {
-        console.error("Error fetching thesis data:", error);
-      });
-  };
-
-  const handleFileChange = (e) => {
-    setFile(e.target.files[0]);
-    setIsModalOpen(true);
-    setSubmissionStatus(null);
-  };
-
-  const handleSubmit = () => {
-    setIsSubmitting(true);
-    if (file && description) {
-      uploadFile();
-      setTimeout(() => {
-        setSubmissionStatus("success");
-        setIsSubmitting(false);
-      }, 2000);
-    } else {
-      setSubmissionStatus("failure");
-      setIsSubmitting(false);
-    }
-  };
-
-  const renderModal = () => (
-    <div className="fixed inset-0 bg-gray-900 bg-opacity-75 flex justify-center items-center">
-      <div className="bg-white p-6 rounded-lg shadow-lg w-[600px]">
-        {submissionStatus === null ? (
-          <>
-            <h2 className="text-lg font-bold mb-[13px]">
-              Enter Thesis Description:
-            </h2>
-            <textarea
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              placeholder="Enter thesis description here..."
-              className="w-full p-2 border rounded-md mb-[33px]"
-              rows={8}
-              disabled={isSubmitting}
-            />
-
-            <div className="flex justify-between">
-              <button
-                onClick={() => setIsModalOpen(false)}
-                className="ml-4 bg-gray-500 text-white px-4 py-2 rounded"
-                disabled={isSubmitting}
-              >
-                Cancel
-              </button>
-
-              <button
-                onClick={handleSubmit}
-                className={`bg-[#020252] text-white px-4 py-2 rounded ${
-                  isSubmitting ? "opacity-50 cursor-not-allowed" : ""
-                }`}
-                disabled={isSubmitting}
-              >
-                {isSubmitting ? "Submitting..." : "Submit"}
-              </button>
-            </div>
-          </>
-        ) : submissionStatus === "success" ? (
-          <div className="text-center">
-            <h2 className="text-green-500 text-lg font-bold mb-4">
-              Upload Successful!
-            </h2>
-            <button
-              onClick={() => {
-                setIsModalOpen(false);
-                setFile(null);
-                setDescription("");
-              }}
-              className="bg-blue-500 text-white px-4 py-2 rounded"
-            >
-              Close
-            </button>
-          </div>
-        ) : (
-          <div className="text-center">
-            <h2 className="text-red-500 text-lg font-bold mb-4">
-              Upload Failed!
-            </h2>
-            <button
-              onClick={() => setSubmissionStatus(null)}
-              className="bg-gray-500 text-white px-4 py-2 rounded"
-            >
-              Try Again
-            </button>
-          </div>
-        )}
-      </div>
-    </div>
-  );
 
   return (
     <div className="bg-[#F4F4F4]">
@@ -239,12 +72,6 @@ const UserDisplayThesis = ({ app }) => {
               <img src={upload} alt="Upload" />
               <p className="ml-2">Upload Thesis</p>
             </Link>
-            {/* <input
-              type="file"
-              onChange={handleFileChange}
-              className="absolute inset-0 opacity-0 cursor-pointer"
-              accept=".pdf,.doc,.docx"
-            /> */}
           </div>
         </div>
 
@@ -256,7 +83,7 @@ const UserDisplayThesis = ({ app }) => {
                 <th className="pt-[45px] pb-[20px] w-[25%]">Title</th>
                 <th className="pt-[45px] pb-[20px] w-[20%]">Author</th>
                 <th className="pt-[45px] pb-[20px] w-[10%] xl:w-[20%]">
-                  Last modi...
+                  Date Created
                 </th>
                 <th className="pt-[45px] pb-[20px] w-[15%]">Download</th>
                 {/* <th className="pt-[45px] pb-[20px] w-[20%] xl:w-[15%]"></th> */}
@@ -286,28 +113,25 @@ const UserDisplayThesis = ({ app }) => {
                   return (
                     <tr
                       key={index}
-                      className="bg-[#F4F4F4] mb-[15px] shadow-md shadow-[#00000040]"
+                      className="text-center bg-[#F4F4F4] mb-[15px] shadow-md shadow-[#00000040]"
                     >
-                      <td className="pt-[26px] pb-[18px]">{index + 1}</td>
-                      <td className="pt-[26px] pb-[18px]">
+                      <td className="text-center pt-[26px] pb-[18px]">{index + 1}</td>
+                      <td className="text-center pt-[26px] pb-[18px]">
                         {documentData.fileName}
                       </td>
-                      <td className="pt-[26px] pb-[18px] uppercase">
+                      <td className="text-center pt-[26px] pb-[18px] uppercase">
                         {documentData.author}
                       </td>
-                      <td className="pt-[26px] pb-[18px]">
+                      <td className="text-center pt-[26px] pb-[18px]">
                         {documentData.date_created}
-                      </td>
-                      <td className="pt-[26px] pb-[18px]">
-                        {documentData.lastModified}
                       </td>
                       <td>
                         <a
-                          href=""
-                          className="flex items-center py-[11px] px-[23px] bg-[#020252] text-[#FFFFFF] shadow-md shadow-[#00000040] rounded-[25px]"
+                          href={documentData.downloadURL}
+                          className="text-center flex items-center py-[11px] px-[23px] bg-[#020252] text-[#FFFFFF] shadow-md shadow-[#00000040] rounded-[25px]"
                         >
                           <img src={download} alt="download" />
-                          <p className="ml-2">Download Thesis</p>
+                          <p className="text-center ml-2">Download Thesis</p>
                         </a>
                       </td>
                     </tr>
@@ -317,8 +141,6 @@ const UserDisplayThesis = ({ app }) => {
             </tbody>
           </table>
         </div>
-
-        {isModalOpen && renderModal()}
       </div>
     </div>
   );

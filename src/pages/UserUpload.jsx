@@ -1,7 +1,15 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Navbar from "../components/Navbar";
-import upload from "./../assets/uploadimg.svg"
-
+import upload from "./../assets/uploadimg.svg";
+import {
+  getStorage,
+  ref as storeRef,
+  uploadBytesResumable,
+  getDownloadURL,
+} from "firebase/storage";
+import { getDatabase, ref, set, get} from "firebase/database";
+import { getAuth, onAuthStateChanged } from "firebase/auth";
+import { useNavigate } from "react-router-dom";
 
 const Modal = ({ message, onClose }) => {
   return (
@@ -19,19 +27,106 @@ const Modal = ({ message, onClose }) => {
   );
 };
 
-const UserUpload = () => {
-  const [fullname, setFullname] = useState('');
-  const [projectTitle, setProjectTitle] = useState('');
-  const [abstract, setAbstract] = useState('');
+const UserUpload = ({ app }) => {
+  const [fullname, setFullname] = useState("");
+  const [projectTitle, setProjectTitle] = useState("");
+  const [abstract, setAbstract] = useState("");
   const [file, setFile] = useState(null);
   const [successModal, setSuccessModal] = useState(false);
   const [errorModal, setErrorModal] = useState(false);
-  const [errorMessage, setErrorMessage] = useState('');
+  const [errorMessage, setErrorMessage] = useState("");
+  const [user, setUser] = useState(null);
+
+  const navigate = useNavigate()
+  const auth = getAuth();
+  const storage = getStorage();
+  const database = getDatabase(app);
+  
+  useEffect(() => {
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        setUser(user);
+      } else {
+        setUser(null);
+        navigate("/login");
+      }
+    });
+  }, [auth])
+  
+
+
+  const uploadFile = () => {
+    let fileDetails;
+
+    if (file) {
+      fileDetails = {
+        fileName: file["name"],
+        author: fullname,
+        abstract: abstract,
+        date_created: new Date().toLocaleString(),
+      };
+    }
+
+    // Sanitize the file name by encoding it
+    const sanitizedFileName = fileDetails.fileName.replace(/[ .#$[\]]/g, "_");
+
+    const thesisRef_db = ref(
+      database,
+      `thesis/${user.uid}/${sanitizedFileName}`
+    );
+    get(thesisRef_db)
+      .then((snapshot) => {
+        if (snapshot.exists()) {
+          console.log("Thesis exists in the database:", snapshot.val());
+        } else {
+          console.log("Thesis does not exist in the database");
+          let thesisRef = storeRef(
+            storage,
+            `thesis/${user.uid}/${fileDetails.fileName}`
+          );
+          const uploadTask = uploadBytesResumable(thesisRef, file);
+
+          uploadTask.on(
+            "state_changed",
+            (snapshot) => {
+              const progress =
+                (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+              console.log("Upload is " + progress + "% done");
+            },
+            (error) => {
+              // Handle unsuccessful uploads
+              console.error("Upload failed:", error);
+            },
+            () => {
+              // Handle successful uploads on complete
+              console.log("Upload complete.");
+              // Get the uploaded file's Storage Reference
+              getDownloadURL(thesisRef).then((downloadURL) => {
+                set(thesisRef_db, { ...fileDetails, downloadURL })
+                  .then(() => {
+                    console.log("Thesis saved successfully with download URL!");
+                  })
+                  .catch((error) => {
+                    console.error(
+                      "Error saving thesis data with download URL:",
+                      error
+                    );
+                  });
+              });
+            }
+          );
+        }
+      })
+      .catch((error) => {
+        console.error("Error fetching thesis data:", error);
+      });
+  };
 
   const handleFileChange = (event) => {
     const uploadedFile = event.target.files[0];
-    if (uploadedFile && uploadedFile.size > 50000000) { //I limited the file size to 50MB here
-      setErrorMessage('File size exceeds 50MB');
+    if (uploadedFile && uploadedFile.size > 100000000) {
+      //I limited the file size to 100MB here
+      setErrorMessage("File size exceeds 100MB");
       setErrorModal(true);
       return;
     }
@@ -43,7 +138,7 @@ const UserUpload = () => {
 
     // Check if file is uploaded
     if (!file) {
-      setErrorMessage('Please upload a project file.');
+      setErrorMessage("Please upload a project file.");
       setErrorModal(true);
       return;
     }
@@ -54,7 +149,7 @@ const UserUpload = () => {
     if (fileUploadSuccess) {
       setSuccessModal(true);
     } else {
-      setErrorMessage('There was an error uploading the file.');
+      setErrorMessage("There was an error uploading the file.");
       setErrorModal(true);
     }
   };
@@ -116,25 +211,29 @@ const UserUpload = () => {
               className="w-full py-2 px-3 border border-gray-300 rounded-md cursor-pointer"
             />
             <p className="mt-2 text-gray-500">
-              {file ? file.name : 'No file chosen'}
+              {file ? file.name : "No file chosen"}
             </p>
           </div>
 
           <div className="flex justify-end">
-          <button
-            type="submit"
-            className="bg-[#020252] hover:bg-blue-700 text-white font-bold py-2 px-[70px] rounded focus:outline-none focus:shadow-outline flex gap-[10px] "
-          >
-            <img src={upload} alt="" />
-            <p>Upload Thesis</p>
-          </button>
+            <button
+              type="submit"
+              className="bg-[#020252] hover:bg-blue-700 text-white font-bold py-2 px-[70px] rounded focus:outline-none focus:shadow-outline flex gap-[10px] "
+              onClick={uploadFile}
+            >
+              <img src={upload} alt="" />
+              <p>Upload Thesis</p>
+            </button>
           </div>
         </form>
       </div>
 
       {/* Success Modal */}
       {successModal && (
-        <Modal message="Form submitted successfully!" onClose={() => setSuccessModal(false)} />
+        <Modal
+          message="Form submitted successfully!"
+          onClose={() => setSuccessModal(false)}
+        />
       )}
 
       {/* Error Modal */}
