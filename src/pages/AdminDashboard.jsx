@@ -50,9 +50,9 @@ const AdminDashboard = () => {
             <p className="font-[600] text-[20px] leading-[24.2px]">
               Name<span className="ml-[17px] font-[400] uppercase">{signuser ? signuser.displayName : ''}</span>
             </p>
-            {/* <p className="font-[600] text-[20px] leading-[24.2px]">
-              Status<span className="ml-[17px]"></span>
-            </p> */}
+            <p className="font-[600] text-[20px] leading-[24.2px]">
+              Status<span className="ml-[17px]">ADMIN</span>
+            </p>
           </span>
         </div>
 

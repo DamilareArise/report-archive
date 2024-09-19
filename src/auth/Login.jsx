@@ -38,7 +38,7 @@ const LoginPage = () => {
         <div className="/space-y-4 flex justify-center items-center flex-col gap-[22px] ">
           <label className="flex items-center border-[1px] border-[#BDB8B8] bg-[#99989833] gap-[20px] md:gap-[84px] p-[16px] md:p-[26px] w-[300px] md:w-[621px] font-[400] text-[20px] md:text-[28px] leading-[38.73px]">
             <input type="radio" name="role" value="user" onChange={handleRoleChange} className="/mr-2 custom-radio" />
-            Login as Studpent
+            Login as Student
           </label>
           <label className="flex items-center border-[1px] border-[#BDB8B8] bg-[#99989833] gap-[20px] md:gap-[84px] p-[16px] md:p-[26px] w-[300px] md:w-[621px] font-[400] text-[20px] md:text-[28px] leading-[38.73px]">
             <input type="radio" name="role" value="admin" onChange={handleRoleChange} className="/mr-2 custom-radio" />
