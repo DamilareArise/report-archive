@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import Navbar from "../components/Navbar";
 import upload from "./../assets/uploadimg.svg";
+import arrowBack from "./../assets/arrowBack.png";
 import {
   getStorage,
   ref as storeRef,
@@ -9,7 +10,7 @@ import {
 } from "firebase/storage";
 import { getDatabase, ref, set, get } from "firebase/database";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 const Modal = ({ message, onClose }) => {
   return (
@@ -41,7 +42,7 @@ const UserUpload = ({ app }) => {
   const auth = getAuth();
   const storage = getStorage();
   const database = getDatabase(app);
-  
+
   // Ref for file input
   const fileInputRef = useRef(null);
 
@@ -121,7 +122,6 @@ const UserUpload = ({ app }) => {
       .catch((error) => {
         console.error("Error fetching thesis data:", error);
       });
-
   };
 
   const handleFileChange = (event) => {
@@ -150,7 +150,7 @@ const UserUpload = ({ app }) => {
 
     if (fileUploadSuccess) {
       setSuccessModal(true);
-      
+
       // Clear the form fields
       setFullname("");
       setAbstract("");
@@ -170,9 +170,12 @@ const UserUpload = ({ app }) => {
   return (
     <div className="/min-h-screen bg-gray-100 /p-6">
       <Navbar />
-
+      <Link to={"/userdisplay"}>
+          <img src={arrowBack} alt="Go Back"  className="pl-[41px] pt-[20px]"/>
+        </Link>
       {/* Form */}
       <div className="bg-white max-w-4xl mx-auto mt-10 p-8 shadow-md rounded-md">
+        
         <form onSubmit={handleSubmit}>
           <div className="mb-6">
             <label className="block text-gray-700 text-sm font-bold mb-2">
