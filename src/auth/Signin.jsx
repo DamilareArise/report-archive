@@ -8,7 +8,7 @@ import passwordd from "../assets/password.svg";
 
 import { getAuth, signInWithPopup, GoogleAuthProvider, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "firebase/auth";
 import { getDatabase, ref, set, get } from "firebase/database";
-import { useNavigate, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 
 const Signin = ({ app }) => {
   const [email, setEmail] = useState("");
@@ -210,11 +210,14 @@ const Signin = ({ app }) => {
             {loading ? "Loading..." : "Login"}
           </button>
 
+          <div>
+            <Link to={'/signUp'} className="cursor-pointer">Don&apos;t have an account ?<br/>SIGN UP</Link>
           <a href="#" className="w-full">
             <p className="text-right md:text-[20px] font-[400] text-[16px]">
               Forget password?
             </p>
           </a>
+          </div>
         </form>
 
         <div className="flex gap-[12px] items-center mb-[8px]">
