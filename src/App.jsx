@@ -44,7 +44,7 @@ function App() {
           <Route path="/admindashboard" element={<AdminDashboard />} />
           <Route path="/supervisordashboard" element={<SupervisorDashboard/>} />
           <Route path="/supervisorApproval" element={<SupervisorApproval/>} />
-          <Route path="/userUpload" element={<UserUpload/>} />
+          <Route path="/userUpload" element={<UserUpload app={app}/>} />
         </Routes>
       </Router>
     </>
