@@ -7,7 +7,7 @@ import {
   uploadBytesResumable,
   getDownloadURL,
 } from "firebase/storage";
-import { getDatabase, ref, set, get} from "firebase/database";
+import { getDatabase, ref, set, get } from "firebase/database";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { useNavigate } from "react-router-dom";
 
@@ -37,11 +37,11 @@ const UserUpload = ({ app }) => {
   const [errorMessage, setErrorMessage] = useState("");
   const [user, setUser] = useState(null);
 
-  const navigate = useNavigate()
+  const navigate = useNavigate();
   const auth = getAuth();
   const storage = getStorage();
   const database = getDatabase(app);
-  
+
   useEffect(() => {
     onAuthStateChanged(auth, (user) => {
       if (user) {
@@ -51,9 +51,7 @@ const UserUpload = ({ app }) => {
         navigate("/login");
       }
     });
-  }, [auth])
-  
-
+  }, [auth]);
 
   const uploadFile = () => {
     let fileDetails;
@@ -120,6 +118,11 @@ const UserUpload = ({ app }) => {
       .catch((error) => {
         console.error("Error fetching thesis data:", error);
       });
+
+      setFullname('');
+      setAbstract('');
+      setProjectTitle('');
+      setFile(null)
   };
 
   const handleFileChange = (event) => {
@@ -206,6 +209,7 @@ const UserUpload = ({ app }) => {
             </label>
             <input
               type="file"
+            //   value={file}
               onChange={handleFileChange}
               required
               className="w-full py-2 px-3 border border-gray-300 rounded-md cursor-pointer"
