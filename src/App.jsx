@@ -42,8 +42,8 @@ function App() {
           <Route path="/admindisplay" element={<AdminDisplayThesis app={app}/>}/>
           <Route path="/userdisplay" element={<UserDisplayThesis app={app} /> }/>
           <Route path="/admindashboard" element={<AdminDashboard />} />
-          <Route path="/supervisordashboard" element={<SupervisorDashboard/>} />
-          <Route path="/supervisorApproval" element={<SupervisorApproval/>} />
+          <Route path="/supervisordashboard" element={<SupervisorDashboard app={app} />} />
+          <Route path="/supervisorApproval/:fileurl" element={<SupervisorApproval/>} />
           <Route path="/userUpload" element={<UserUpload app={app}/>} />
         </Routes>
       </Router>
