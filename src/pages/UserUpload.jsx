@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Navbar from "../components/Navbar";
 import upload from "./../assets/uploadimg.svg";
 import {
@@ -41,6 +41,9 @@ const UserUpload = ({ app }) => {
   const auth = getAuth();
   const storage = getStorage();
   const database = getDatabase(app);
+  
+  // Ref for file input
+  const fileInputRef = useRef(null);
 
   useEffect(() => {
     onAuthStateChanged(auth, (user) => {
@@ -119,16 +122,12 @@ const UserUpload = ({ app }) => {
         console.error("Error fetching thesis data:", error);
       });
 
-      setFullname('');
-      setAbstract('');
-      setProjectTitle('');
-      setFile(null)
   };
 
   const handleFileChange = (event) => {
     const uploadedFile = event.target.files[0];
     if (uploadedFile && uploadedFile.size > 100000000) {
-      //I limited the file size to 100MB here
+      // I limited the file size to 100MB here
       setErrorMessage("File size exceeds 100MB");
       setErrorModal(true);
       return;
@@ -151,6 +150,17 @@ const UserUpload = ({ app }) => {
 
     if (fileUploadSuccess) {
       setSuccessModal(true);
+      
+      // Clear the form fields
+      setFullname("");
+      setAbstract("");
+      setProjectTitle("");
+      setFile(null);
+
+      // Clear the file input using ref
+      if (fileInputRef.current) {
+        fileInputRef.current.value = ""; // Reset file input
+      }
     } else {
       setErrorMessage("There was an error uploading the file.");
       setErrorModal(true);
@@ -209,7 +219,7 @@ const UserUpload = ({ app }) => {
             </label>
             <input
               type="file"
-            //   value={file}
+              ref={fileInputRef} // Attach ref to file input
               onChange={handleFileChange}
               required
               className="w-full py-2 px-3 border border-gray-300 rounded-md cursor-pointer"
