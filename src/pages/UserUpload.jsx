@@ -1,15 +1,16 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Navbar from "../components/Navbar";
 import upload from "./../assets/uploadimg.svg";
+import arrowBack from "./../assets/arrowBack.png";
 import {
   getStorage,
   ref as storeRef,
   uploadBytesResumable,
   getDownloadURL,
 } from "firebase/storage";
-import { getDatabase, ref, set, get} from "firebase/database";
+import { getDatabase, ref, set, get } from "firebase/database";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 const Modal = ({ message, onClose }) => {
   return (
@@ -37,10 +38,13 @@ const UserUpload = ({ app }) => {
   const [errorMessage, setErrorMessage] = useState("");
   const [user, setUser] = useState(null);
 
-  const navigate = useNavigate()
+  const navigate = useNavigate();
   const auth = getAuth();
   const storage = getStorage();
   const database = getDatabase(app);
+
+  // Ref for file input
+  const fileInputRef = useRef(null);
 
   useEffect(() => {
     onAuthStateChanged(auth, (user) => {
@@ -51,9 +55,7 @@ const UserUpload = ({ app }) => {
         navigate("/login");
       }
     });
-  }, [auth])
-  
-
+  }, [auth]);
 
   const uploadFile = () => {
     let fileDetails;
@@ -125,7 +127,7 @@ const UserUpload = ({ app }) => {
   const handleFileChange = (event) => {
     const uploadedFile = event.target.files[0];
     if (uploadedFile && uploadedFile.size > 100000000) {
-      //I limited the file size to 100MB here
+      // I limited the file size to 100MB here
       setErrorMessage("File size exceeds 100MB");
       setErrorModal(true);
       return;
@@ -148,6 +150,17 @@ const UserUpload = ({ app }) => {
 
     if (fileUploadSuccess) {
       setSuccessModal(true);
+
+      // Clear the form fields
+      setFullname("");
+      setAbstract("");
+      setProjectTitle("");
+      setFile(null);
+
+      // Clear the file input using ref
+      if (fileInputRef.current) {
+        fileInputRef.current.value = ""; // Reset file input
+      }
     } else {
       setErrorMessage("There was an error uploading the file.");
       setErrorModal(true);
@@ -158,8 +171,13 @@ const UserUpload = ({ app }) => {
     <div className="/min-h-screen bg-gray-100 /p-6">
       <Navbar user={user}/>
 
+      <Navbar />
+      <Link to={"/userdisplay"}>
+          <img src={arrowBack} alt="Go Back"  className="pl-[41px] pt-[20px]"/>
+        </Link>
       {/* Form */}
       <div className="bg-white max-w-4xl mx-auto mt-10 p-8 shadow-md rounded-md">
+        
         <form onSubmit={handleSubmit}>
           <div className="mb-6">
             <label className="block text-gray-700 text-sm font-bold mb-2">
@@ -206,6 +224,7 @@ const UserUpload = ({ app }) => {
             </label>
             <input
               type="file"
+              ref={fileInputRef} // Attach ref to file input
               onChange={handleFileChange}
               required
               className="w-full py-2 px-3 border border-gray-300 rounded-md cursor-pointer"

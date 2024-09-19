@@ -48,13 +48,13 @@ const UserDisplayThesis = ({ app }) => {
 
 
   return (
-    <div className="bg-[#F4F4F4]">
+    <div className="bg-[#F4F4F4] h-screen">
       <Navbar user={user} />
       <div>
         <div className="flex flex-col md:flex-row justify-between items-center px-[24px] md:px-[41px] py-[38px]">
-          <Link to={"/"} className="self-start md:self-center">
+          {/* <Link to={"/"} className="self-start md:self-center">
             <img src={arrowBack} alt="Go Back" />
-          </Link>
+          </Link> */}
           <div className="flex items-center bg-[#FFFFFF] gap-[17.43px] rounded-[25px] px-[16px] shadow-md shadow-[#00000040] md:basis-[60%] w-full">
             <img src={search} alt="Search" width={24} height={24} />
             <input
@@ -76,13 +76,13 @@ const UserDisplayThesis = ({ app }) => {
         </div>
 
         <div className="overflow-x-auto md:px-[41px] xl:px-[50px] w-full ">
-          <table className="/bg-[#F8F4F8] min-w-[600px]">
+          <table className="/bg-[#F8F4F8] min-w-[600px] w-full">
             <thead>
               <tr className="pt-[45px] pb-[20px]">
                 <th className="pt-[45px] pb-[20px] w-[5%]">S/N</th>
                 <th className="pt-[45px] pb-[20px] w-[25%]">Title</th>
                 <th className="pt-[45px] pb-[20px] w-[20%]">Author</th>
-                <th className="pt-[45px] pb-[20px] w-[10%] xl:w-[20%]">
+                <th className="pt-[45px] pb-[20px] w-[20%] xl:w-[20%]">
                   Date Created
                 </th>
                 <th className="pt-[45px] pb-[20px] w-[15%]">Download</th>
@@ -113,7 +113,7 @@ const UserDisplayThesis = ({ app }) => {
                   return (
                     <tr
                       key={index}
-                      className="text-center bg-[#F4F4F4] mb-[15px] shadow-md shadow-[#00000040]"
+                      className="text-center bg-[#F4F4F4] mb-[15px] shadow-md shadow-[#00000040] border-b-2 border-black"
                     >
                       <td className="text-center pt-[26px] pb-[18px]">{index + 1}</td>
                       <td className="text-center pt-[26px] pb-[18px]">
