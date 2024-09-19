@@ -1,13 +1,32 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Worker, Viewer } from "@react-pdf-viewer/core";
 import "@react-pdf-viewer/core/lib/styles/index.css";
 import Navbar from "../components/Navbar";
+import { useNavigate, useParams } from "react-router-dom";
+import { getAuth, onAuthStateChanged } from "firebase/auth";
 
 const SupervisorApproval = () => {
   const [isModalOpen, setModalOpen] = useState(false);
   const [comment, setComment] = useState("");
   const [isSuccessModalOpen, setSuccessModalOpen] = useState(false);
   const [pdfFile, setPdfFile] = useState("/assets/Adesola.pdf");
+  const [signuser, setUser] = useState(null);
+
+  const { fileurl } = useParams()
+  const decodedFileUrl = decodeURIComponent(fileurl);
+  const auth = getAuth();
+  const navigate = useNavigate()
+
+  useEffect(() => {
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        setUser(user);  
+      } else {
+        setUser(null);
+        navigate("/login");
+      }
+    });
+  }, [auth])
 
   const handleApprove = () => {
     alert("The document has been approved.");
@@ -29,8 +48,8 @@ const SupervisorApproval = () => {
 
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col">
-      {/* Navbar */}
-      <Navbar />
+      
+      <Navbar user={signuser}/>
 
       {/* Main content */}
       <div className="flex flex-col /flex-grow /container w-full md:w-[80%] mx-auto mt-6">
@@ -42,7 +61,7 @@ const SupervisorApproval = () => {
               <Worker
                 workerUrl={`https://unpkg.com/pdfjs-dist@3.11.174/build/pdf.worker.min.js`}
               >
-                <Viewer fileUrl={"src/assets/Adesola.pdf"} />
+                <Viewer fileUrl={decodedFileUrl} />
               </Worker>
             </div>
           </div>
