@@ -170,8 +170,7 @@ const UserUpload = ({ app }) => {
   return (
     <div className="/min-h-screen bg-gray-100 /p-6">
       <Navbar user={user}/>
-
-      <Navbar />
+      
       <Link to={"/userdisplay"}>
           <img src={arrowBack} alt="Go Back"  className="pl-[41px] pt-[20px]"/>
         </Link>
